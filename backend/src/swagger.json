@@ -1,0 +1,208 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "Yet Another Node.js Blogg Application API",
+    "description": "Yet Another Node.js Blogg Application API",
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "host": "localhost:4000",
+  "basePath": "/api/v1",
+  "tags": [
+    {
+      "name": "Items",
+      "description": "API for users in the system"
+    }
+  ],
+  "schemes": [
+    "http"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/items": {
+      "post": {
+        "tags": [
+          "Items"
+        ],
+        "description": "Create new item in system",
+        "parameters": [
+          {
+            "name": "item",
+            "in": "body",
+            "description": "Item that we want to create",
+            "schema": {
+              "$ref": "#/definitions/Item"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "New item is created",
+            "schema": {
+              "$ref": "#/definitions/Item"
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Items"
+        ],
+        "summary": "Get all items in system",
+        "parameters": [
+          {
+            "name": "searchTerm",
+            "in": "query",
+            "description": "search term looking in all text fields",
+            "type": "string"
+          },
+          {
+            "name": "sortOrder",
+            "in": "query",
+            "description": "sort order, possible values asc and desc",
+            "type": "string"
+          },
+          {
+            "name": "sortField",
+            "in": "query",
+            "description": "field the results are sorted by",
+            "type": "string"
+          },
+          {
+            "name": "skip",
+            "in": "query",
+            "description": "skip a number of items",
+            "type": "number"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "limit to number of items",
+            "type": "number"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/Items"
+            }
+          }
+        }
+      }
+    },
+    "/users/{userId}": {
+      "parameters": [
+        {
+          "name": "userId",
+          "in": "path",
+          "required": true,
+          "description": "ID of user that we want to find",
+          "type": "string"
+        }
+      ],
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Get user with given ID",
+        "responses": {
+          "200": {
+            "description": "User is found",
+            "schema": {
+              "$ref": "#/definitions/Item"
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete user with given ID",
+        "tags": [
+          "Users"
+        ],
+        "responses": {
+          "200": {
+            "description": "User is deleted",
+            "schema": {
+              "$ref": "#/definitions/Item"
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Update user with give ID",
+        "tags": [
+          "Users"
+        ],
+        "parameters": [
+          {
+            "name": "user",
+            "in": "body",
+            "description": "User with new values of properties",
+            "schema": {
+              "$ref": "#/definitions/Item"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User is updated",
+            "schema": {
+              "$ref": "#/definitions/Item"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Item": {
+      "required": [
+        "name",
+        "_id"
+      ],
+      "properties": {
+        "_id": {
+          "type": "string",
+          "uniqueItems": true
+        },
+        "name": {
+          "type": "string",
+          "example": "Strampler"
+        },
+        "size": {
+          "type": "string"
+        },
+        "amount": {
+          "type": "number"
+        },
+        "rental": {
+          "type": "boolean"
+        },
+        "donor": {
+          "type": "string"
+        },
+        "image": {
+          "type": "string"
+        }
+      }
+    },
+    "Items": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Item"
+      }
+    }
+  }
+}
