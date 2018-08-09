@@ -6,7 +6,8 @@ const itemSchema = mongoose.Schema({
     amount: Number,
     image: String,
     donor: String,
-    rental: Boolean
+    rental: Boolean,
+    creationDate: Date
 });
 
 const Item = mongoose.model('Item', itemSchema);

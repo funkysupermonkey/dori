@@ -23,14 +23,17 @@ app.use(bodyParser.urlencoded({
 app.use(bodyParser.json());
 
 router.route('/items').post((req, res) => {
-    createItem(req.body).then(res.json).catch((reason) => {
-        res.status(500).send(reason);
+    createItem(req.body).then((item) => {
+        res.json(item);
+    }).catch((reason) => {
+        console.log(reason);
+        res.status(500).send(reason.message);
     });
 }).get((req, res) => {
     getItems(req.query).then((items) => {
         res.json(items);
     }).catch((reason) => {
-        res.status(500).send(reason);
+        res.status(500).send(reason.message);
     });
 });
 

@@ -2,6 +2,7 @@ import Item from '../db/item.model';
 
 function createItem(item) {
     var item = new Item(item);
+    item.creationDate = new Date();
     return item.save();
 }
 
