@@ -74,11 +74,10 @@ class Create extends Component {
         fetch('/api/v1/upload', {
             method: 'POST',
             body: data
-        }).then((response) => {
-            console.log(response);
-            let images = [response].concat(this.state.images);
-            this.setState({images});
-            console.log(this.state);
+        }).then(res => res.text()).then((response) => {
+            this.setState(prevState => ({
+                images: [response, ...prevState.images]
+              }))
         }).catch(reason => console.log(reason));
         event.preventDefault();
     }
@@ -165,7 +164,7 @@ class Create extends Component {
                         <Grid item xs={12}>
                             <Button type="submit" className={classes.control} color="primary" variant="contained">Save</Button>
                         </Grid>
-                        <input id="photo" type="file" className={classes.photoInput}  onChange={this.handleUpload} />
+                        <input id="photo" type="file" className={classes.photoInput}  onChange={this.handleUpload.bind(this)} />
                         <label htmlFor="photo">
                             <Button variant="fab" color="secondary" aria-label="Photo" className={classes.photo}>
                                 <PhotoCameraIcon />

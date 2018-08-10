@@ -58,6 +58,6 @@ router.route('/upload').post((req, res) => {
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerConfig));
 app.use('/api/v1', router);
-app.use(express.static('tmp'));
+app.use('/tmp', express.static('tmp'));
 
 app.listen(4000);
