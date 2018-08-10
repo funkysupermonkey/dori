@@ -4,6 +4,8 @@ import {createItem, getItems} from './service/item.service';
 import bodyParser from 'body-parser'
 import swaggerUi from 'swagger-ui-express';
 import swaggerConfig from './swagger.json';
+import fileUpload from 'express-fileupload';
+import path from 'path';
 
 mongoose.connect('mongodb://localhost/test');
 var db = mongoose.connection;
@@ -21,6 +23,7 @@ app.use(bodyParser.urlencoded({
   extended: true
 }));
 app.use(bodyParser.json());
+app.use(fileUpload());
 
 router.route('/items').post((req, res) => {
     createItem(req.body).then((item) => {
@@ -37,7 +40,24 @@ router.route('/items').post((req, res) => {
     });
 });
 
+router.route('/upload').post((req, res) => {
+    let file = req.files.file;
+    let filepath = `tmp/${file.name}`;
+    if (!req.files)
+        return res.status(400).send('No files were uploaded.');
+    if(!/image\/(png|jpg)/.test(file.mimetype))
+        return res.status(400).send('Please upload an image.');
+        file.mv(path.resolve(filepath), function(err) {
+        if (err) {
+            console.log(err);
+            return res.status(500).send(err);
+        }
+        res.send(filepath);
+      });
+});
+
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerConfig));
 app.use('/api/v1', router);
+app.use(express.static('tmp'));
 
 app.listen(4000);

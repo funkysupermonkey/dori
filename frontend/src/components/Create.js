@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
-import { Grid, Switch, AppBar, Toolbar, IconButton, FormControlLabel, TextField, Button } from '@material-ui/core';
+import { Grid, Switch, AppBar, Toolbar, IconButton, FormControlLabel, TextField, Button, GridList, GridListTile } from '@material-ui/core';
 import NavigateBeforeIcon from '@material-ui/icons/NavigateBefore';
+import PhotoCameraIcon from '@material-ui/icons/PhotoCamera';
 import { withRouter } from 'react-router-dom';
 import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
 
@@ -11,8 +12,13 @@ const styles = theme => ({
     margin: {
 
     },
-    icon: {
-
+    photoInput: {
+        display: 'none'
+    },
+    photo: {
+        position: 'fixed',
+        bottom: theme.spacing.unit * 2,
+        right: theme.spacing.unit * 2
     },
     control: {
         margin: theme.spacing.unit * 2,
@@ -26,7 +32,7 @@ class Create extends Component {
                 name: '',
                 size: '',
                 amount: 0,
-                image: '',
+                images: [],
                 donor: '',
                 rental: false
             };
@@ -48,7 +54,7 @@ class Create extends Component {
         });
     }
 
-    handleSave() {
+    handleSave(event) {
         fetch('/api/v1/items', {
             method: 'POST',
             headers: {
@@ -59,6 +65,22 @@ class Create extends Component {
         }).then((() => {
             this.props.history.push('/');
         }));
+        event.preventDefault();
+    }
+
+    handleUpload(event) {
+        let data = new FormData();
+        data.append('file', event.target.files[0]);
+        fetch('/api/v1/upload', {
+            method: 'POST',
+            body: data
+        }).then((response) => {
+            console.log(response);
+            let images = [response].concat(this.state.images);
+            this.setState({images});
+            console.log(this.state);
+        }).catch(reason => console.log(reason));
+        event.preventDefault();
     }
 
     render() {
@@ -143,8 +165,21 @@ class Create extends Component {
                         <Grid item xs={12}>
                             <Button type="submit" className={classes.control} color="primary" variant="contained">Save</Button>
                         </Grid>
+                        <input id="photo" type="file" className={classes.photoInput}  onChange={this.handleUpload} />
+                        <label htmlFor="photo">
+                            <Button variant="fab" color="secondary" aria-label="Photo" className={classes.photo}>
+                                <PhotoCameraIcon />
+                            </Button>
+                        </label>
                     </Grid>
                 </ValidatorForm>
+                <GridList cellHeight={180}>
+                    {this.state.images.map(img => (
+                        <GridListTile key={img}>
+                            <img src={process.env.PUBLIC_URL + img} />
+                        </GridListTile>
+                    ))}
+                </GridList>
             </div>
         );
     }

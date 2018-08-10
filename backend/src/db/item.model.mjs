@@ -4,7 +4,7 @@ const itemSchema = mongoose.Schema({
     name: String,
     size: String,
     amount: Number,
-    image: String,
+    images: [String],
     donor: String,
     rental: Boolean,
     creationDate: Date
