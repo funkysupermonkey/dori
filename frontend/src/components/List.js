@@ -18,6 +18,7 @@ import SortIcon from '@material-ui/icons/Sort';
 import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward';
 import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
 import CheckIcon from '@material-ui/icons/Check';
+import ImageIcon from '@material-ui/icons/Image';
 
 import Search from './Search';
 
@@ -30,7 +31,6 @@ const styles = theme => ({
         display: 'flex',
         flexWrap: 'wrap',
         justifyContent: 'space-around',
-        overflow: 'hidden',
         backgroundColor: theme.palette.background.paper,
     },
     gridList: {
@@ -41,6 +41,15 @@ const styles = theme => ({
         position: 'fixed',
         bottom: theme.spacing.unit * 2,
         right: theme.spacing.unit * 2
+    },
+    imageIcon: {
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%,-50%)',
+        opacity: 0.1,
+        fontSize: '10em'
+
     }
 });
 
@@ -54,6 +63,10 @@ const options = [{
     label: 'Creation Date',
     sortField: 'creationDate',
     sortOrder: 'desc'
+},{
+    label: 'Size',
+    sortField: 'size',
+    sortOrder: 'asc'
 }];
 
 class List extends Component {
@@ -63,11 +76,8 @@ class List extends Component {
         this.state = {
             error: null,
             isLoaded: false,
-            items: [],
             anchorEl: null,
-            sortOrder: 'desc',
-            sortField: 'creationDate',
-            searchTerm: ''
+            items: []
         }
     }
 
@@ -76,7 +86,7 @@ class List extends Component {
     }
 
     toggleSortOrder(option) {
-        if(option.sortOrder === 'asc') {
+        if (option.sortOrder === 'asc') {
             option.sortOrder = 'desc';
         } else {
             option.sortOrder = 'asc';
@@ -97,27 +107,27 @@ class List extends Component {
         fetch(`/api/v1/items${queryString ? '?' + queryString : ''}`)
             .then(res => res.json())
             .then(
-                (result) => {
-                    this.setState({
-                        isLoaded: true,
-                        items: result
-                    });
-                },
-                // Note: it's important to handle errors here
-                // instead of a catch() block so that we don't swallow
-                // exceptions from actual bugs in components.
-                (error) => {
-                    this.setState({
-                        isLoaded: true,
-                        error,
-                        items: []
-                    });
-                }
+            (result) => {
+                this.setState({
+                    isLoaded: true,
+                    items: result
+                });
+            },
+            // Note: it's important to handle errors here
+            // instead of a catch() block so that we don't swallow
+            // exceptions from actual bugs in components.
+            (error) => {
+                this.setState({
+                    isLoaded: true,
+                    error,
+                    items: []
+                });
+            }
             )
     }
 
     handleSearchTermChange(searchTerm) {
-        this.setState({searchTerm: searchTerm});
+        this.setState({ searchTerm: searchTerm });
         this.fetchItems();
     }
 
@@ -126,32 +136,43 @@ class List extends Component {
     }
 
     handleOpenSortMenu = (event) => {
-        this.setState({ anchorEl: event.currentTarget});   
+        this.setState({ anchorEl: event.currentTarget });
     };
     handleCloseSortMenu = (event) => {
-        this.setState({ anchorEl: null});
+        this.setState({ anchorEl: null });
     };
     handleSortClick = (option) => {
         console.log(option);
-        if(option.sortField === this.state.sortField) {
+        if (option.sortField === this.state.sortField) {
             this.toggleSortOrder(option);
         }
-        this.setState({sortField:  option.sortField, sortOrder: option.sortOrder});
+        this.setState({ sortField: option.sortField, sortOrder: option.sortOrder });
         this.fetchItems();
     };
 
+    handleItemClick(item) {
+        this.props.history.push('/item/' + item._id);
+    };
+
     renderSortOrder(option) {
-        if(option.sortOrder === 'asc') {
-            return(<ListItemIcon><ArrowUpwardIcon /></ListItemIcon>);
+        if (option.sortOrder === 'asc') {
+            return (<ListItemIcon><ArrowUpwardIcon /></ListItemIcon>);
         }
         return (<ListItemIcon><ArrowDownwardIcon /></ListItemIcon>);
-    }
+    };
 
     renderSelectedSort(option) {
-        if(this.state.sortField === option.sortField) {
+        if (this.state.sortField === option.sortField) {
             return (<ListItemSecondaryAction><CheckIcon /></ListItemSecondaryAction>);
         }
-    }
+    };
+
+    renderImage(item) {
+        let {classes} = this.props;
+        if (item.thumbs.length)
+            return (<img src={process.env.PUBLIC_URL + item.thumbs[0]} alt={item.name} />);
+        return (<ImageIcon className={classes.imageIcon} />);
+    };
 
     render() {
         const { classes } = this.props;
@@ -195,8 +216,8 @@ class List extends Component {
                 </AppBar>
                 <GridList cellHeight={180} className={classes.gridList}>
                     {this.state.items.map(item => (
-                        <GridListTile key={item._id}>
-                            <img src={process.env.PUBLIC_URL + "/images/IMG_1953.JPG"} alt={item.name} />
+                        <GridListTile key={item._id} onClick={this.handleItemClick.bind(this, item)}>
+                            {this.renderImage(item)}
                             <GridListTileBar
                                 title={item.name}
                                 subtitle={<span>{item.size}</span>}
@@ -209,7 +230,7 @@ class List extends Component {
                 </Button>
             </div>
         );
-    }
+    };
 }
 
 List.propTypes = {

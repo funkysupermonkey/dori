@@ -5,6 +5,7 @@ const itemSchema = mongoose.Schema({
     size: String,
     amount: Number,
     images: [String],
+    thumbs: [String],
     donor: String,
     rental: Boolean,
     creationDate: Date

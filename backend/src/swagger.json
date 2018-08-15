@@ -102,24 +102,24 @@
         }
       }
     },
-    "/users/{userId}": {
+    "/items/{itemId}": {
       "parameters": [
         {
-          "name": "userId",
+          "name": "itemId",
           "in": "path",
           "required": true,
-          "description": "ID of user that we want to find",
+          "description": "ID of the item that we want to find",
           "type": "string"
         }
       ],
       "get": {
         "tags": [
-          "Users"
+          "Items"
         ],
-        "summary": "Get user with given ID",
+        "summary": "Get the item with given ID",
         "responses": {
           "200": {
-            "description": "User is found",
+            "description": "Item is found",
             "schema": {
               "$ref": "#/definitions/Item"
             }
@@ -127,13 +127,13 @@
         }
       },
       "delete": {
-        "summary": "Delete user with given ID",
+        "summary": "Delete the item with given ID",
         "tags": [
-          "Users"
+          "Items"
         ],
         "responses": {
           "200": {
-            "description": "User is deleted",
+            "description": "Item is deleted",
             "schema": {
               "$ref": "#/definitions/Item"
             }
@@ -141,15 +141,15 @@
         }
       },
       "put": {
-        "summary": "Update user with give ID",
+        "summary": "Update item with given ID",
         "tags": [
-          "Users"
+          "Items"
         ],
         "parameters": [
           {
-            "name": "user",
+            "name": "item",
             "in": "body",
-            "description": "User with new values of properties",
+            "description": "Item with new values of properties",
             "schema": {
               "$ref": "#/definitions/Item"
             }
@@ -157,7 +157,7 @@
         ],
         "responses": {
           "200": {
-            "description": "User is updated",
+            "description": "Item is updated",
             "schema": {
               "$ref": "#/definitions/Item"
             }

@@ -4,7 +4,6 @@ import { withStyles } from '@material-ui/core/styles';
 import { Grid, Switch, AppBar, Toolbar, IconButton, FormControlLabel, TextField, Button, GridList, GridListTile } from '@material-ui/core';
 import NavigateBeforeIcon from '@material-ui/icons/NavigateBefore';
 import PhotoCameraIcon from '@material-ui/icons/PhotoCamera';
-import { withRouter } from 'react-router-dom';
 import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
 
 
@@ -23,19 +22,52 @@ const styles = theme => ({
     control: {
         margin: theme.spacing.unit * 2,
     },
+    gridList: {
+        maxWidth: '500px'
+    }
 });
 
 class Create extends Component {
     constructor(props) {
         super(props);
+        console.log(process.env.PUBLIC_URL);
         this.state = {
+            item: {
+                _id: null,
                 name: '',
                 size: '',
                 amount: 0,
                 images: [],
+                thumbs: [],
                 donor: '',
                 rental: false
-            };
+            }
+        };
+        if (this.props.match && this.props.match.params.id) {
+            this.fetchItem(this.props.match.params.id).then((item) => {
+                this.setState((prevState) => {
+                    return {
+                        item: {
+                           _id: item._id,
+                           name: item.name || prevState.item.name,
+                           size: item.size || prevState.item.size,
+                           amount: item.amount != null ? item.amount : prevState.item.amount,
+                           images: item.images,
+                           thumbs: item.thumbs,
+                           donor: item.donor || prevState.item.donor,
+                           rental: item.rental
+                        }
+                    }
+                });
+            })
+        }
+    }
+
+    fetchItem(id) {
+        return fetch(`/api/v1/items/${id}`)
+            .then(res => res.json(), (err) => {
+                console.error(err.message);
+            });
     }
 
     handleNavigateBack() {
@@ -43,28 +75,50 @@ class Create extends Component {
     }
 
     handleChange = name => event => {
-        this.setState({
-            [name]: event.target.value,
-        });
+        let value = event.target.value;
+        this.setState(prevState => ({
+            item: {
+                ...prevState.item,
+                [name]: value
+            }
+        }));
     };
 
     handleCheckedChange = name => event => {
-        this.setState({
-            [name]: event.target.checked,
-        });
+        let checked = event.target.checked;
+        this.setState(prevState => ({
+            item: {
+                ...prevState.item,
+                [name]: checked
+            }
+        }));
     }
 
     handleSave(event) {
+        const {item} = this.state;
+        if(!item._id) {
         fetch('/api/v1/items', {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(this.state)
+            body: JSON.stringify(item)
         }).then((() => {
             this.props.history.push('/');
         }));
+        } else {
+            fetch(`/api/v1/items/${item._id}`, {
+                method: 'PUT',
+                headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(item)
+            }).then(() => {
+
+            });
+        }
         event.preventDefault();
     }
 
@@ -76,8 +130,11 @@ class Create extends Component {
             body: data
         }).then(res => res.text()).then((response) => {
             this.setState(prevState => ({
-                images: [response, ...prevState.images]
-              }))
+                item: {
+                    ...prevState.item,
+                    images: [response, ...prevState.images]
+                }
+            }));
         }).catch(reason => console.log(reason));
         event.preventDefault();
     }
@@ -103,7 +160,7 @@ class Create extends Component {
                                 className="name"
                                 label="Name"
                                 className={classes.textField}
-                                value={this.state.name}
+                                value={this.state.item.name}
                                 onChange={this.handleChange('name')}
                                 margin="normal"
                                 className={classes.control}
@@ -117,7 +174,7 @@ class Create extends Component {
                                 name="size"
                                 label="Size"
                                 className={classes.textField}
-                                value={this.state.size}
+                                value={this.state.item.size}
                                 onChange={this.handleChange('size')}
                                 margin="normal"
                                 className={classes.control}
@@ -127,7 +184,7 @@ class Create extends Component {
                             <TextField
                                 name="amount"
                                 label="Amount"
-                                value={this.state.amount}
+                                value={this.state.item.amount}
                                 onChange={this.handleChange('amount')}
                                 type="number"
                                 className={classes.textField}
@@ -142,7 +199,7 @@ class Create extends Component {
                             <TextField
                                 name="donor"
                                 label="Donors"
-                                value={this.state.donor}
+                                value={this.state.item.donor}
                                 onChange={this.handleChange('donor')}
                                 className={classes.textField}
                                 margin="normal"
@@ -154,7 +211,7 @@ class Create extends Component {
                                 control={
                                     <Switch
                                         name="rental"
-                                        checked={this.state.rental}
+                                        checked={this.state.item.rental}
                                         onChange={this.handleCheckedChange('rental')}
                                     />
                                 }
@@ -164,7 +221,7 @@ class Create extends Component {
                         <Grid item xs={12}>
                             <Button type="submit" className={classes.control} color="primary" variant="contained">Save</Button>
                         </Grid>
-                        <input id="photo" type="file" className={classes.photoInput}  onChange={this.handleUpload.bind(this)} />
+                        <input id="photo" type="file" className={classes.photoInput} onChange={this.handleUpload.bind(this)} />
                         <label htmlFor="photo">
                             <Button variant="fab" color="secondary" aria-label="Photo" className={classes.photo}>
                                 <PhotoCameraIcon />
@@ -172,10 +229,10 @@ class Create extends Component {
                         </label>
                     </Grid>
                 </ValidatorForm>
-                <GridList cellHeight={180}>
-                    {this.state.images.map(img => (
+                <GridList cellHeight={180} className={classes.gridList}>
+                    {this.state.item.thumbs.map(img => (
                         <GridListTile key={img}>
-                            <img src={process.env.PUBLIC_URL + img} />
+                            <img src={'/' + process.env.PUBLIC_URL + img} />
                         </GridListTile>
                     ))}
                 </GridList>

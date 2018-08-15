@@ -1,8 +1,25 @@
 import Item from '../db/item.model';
+import fs from 'fs'
+import thumb from 'node-thumbnail';
+import {createThumbnail, moveImage, getImageFilename} from './image.service';
 
-function createItem(item) {
+async function createItem(item) {
     var item = new Item(item);
     item.creationDate = new Date();
+    let images = await Promise.all(item.images.map((image) => {
+        if (image.indexOf('tmp/') > -1) {
+            return moveImage(image, 'images/');    
+        }
+        return image;
+    }));
+    let thumbs = await Promise.all(item.images.map((image) => {
+        if (image.indexOf('tmp/') > -1) {
+            return createThumbnail('images/' + getImageFilename(image), 'thumbs/');
+        }
+        return 'thumbs/' + getImageFilename(image)
+    }));
+    item.images = images;
+    item.thumbs = thumbs;
     return item.save();
 }
 
@@ -19,8 +36,24 @@ function getItems(params) {
     }
     if (params.skip) query = query.skip(params.skip);
     if (params.limit) query = query.limit(params.limit);
-    
+
     return query.exec();
 }
 
-export { createItem, getItems };
+function getItem(id) {
+    return Item.findOne({_id: id});
+}
+
+function updateItem(id, item) {
+    return Item.findOne({_id: id}).then((doc) => {
+         const {_id, ...props} = item;
+         doc.set(props);
+         return doc.save();   
+    });
+}
+
+function removeItem(id) {
+    return Item.remove({_id: id});
+}
+
+export { createItem, getItems, getItem, removeItem, updateItem };

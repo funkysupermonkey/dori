@@ -1,6 +1,6 @@
 import express from 'express';
 import mongoose from 'mongoose';
-import {createItem, getItems} from './service/item.service';
+import {createItem, getItems, getItem, removeItem, updateItem} from './service/item.service';
 import bodyParser from 'body-parser'
 import swaggerUi from 'swagger-ui-express';
 import swaggerConfig from './swagger.json';
@@ -40,12 +40,26 @@ router.route('/items').post((req, res) => {
     });
 });
 
+router.route('/items/:id').get((req, res) => {
+    getItem(req.params.id).then((item) => {
+        res.json(item);
+    }).catch(reason => res.status(500).send(reason.message));
+}).delete((req, res) => {
+    removeItem(req.params.id).then(() => {
+        res.status(204).end();
+    }).catch(reason => res.status(500).send(reason.message));
+}).put((req, res) => {
+    updateItem(req.params.id, req.body).then((item) => {
+        res.json(item);
+    }).catch(reason => res.status(500).send(reason.message));
+});
+
 router.route('/upload').post((req, res) => {
     let file = req.files.file;
     let filepath = `tmp/${file.name}`;
     if (!req.files)
         return res.status(400).send('No files were uploaded.');
-    if(!/image\/(png|jpg)/.test(file.mimetype))
+    if(!/image\/(png|jpg|jpeg|gif)/.test(file.mimetype))
         return res.status(400).send('Please upload an image.');
         file.mv(path.resolve(filepath), function(err) {
         if (err) {
@@ -59,5 +73,7 @@ router.route('/upload').post((req, res) => {
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerConfig));
 app.use('/api/v1', router);
 app.use('/tmp', express.static('tmp'));
+app.use('/images', express.static('images'));
+app.use('/thumbs', express.static('thumbs'));
 
 app.listen(4000);
