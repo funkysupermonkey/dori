@@ -6,6 +6,9 @@ import swaggerUi from 'swagger-ui-express';
 import swaggerConfig from './swagger.json';
 import fileUpload from 'express-fileupload';
 import path from 'path';
+import cookieParser from 'cookie-parser';
+import passport from 'passport';
+import {Strategy} from 'passport-openidconnect';
 
 mongoose.connect('mongodb://localhost/test');
 var db = mongoose.connection;
@@ -22,6 +25,7 @@ var app = express();
 app.use(bodyParser.urlencoded({
   extended: true
 }));
+app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(fileUpload());
 

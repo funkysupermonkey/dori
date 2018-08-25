@@ -4,3 +4,4 @@ node_modules
 tmp
 thumbs
 images
+backend/config.js
